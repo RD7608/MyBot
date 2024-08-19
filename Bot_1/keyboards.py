@@ -14,31 +14,18 @@ kb_start = ReplyKeyboardMarkup(
     ], resize_keyboard=True, input_field_placeholder="Сделайте выбор:"
 )
 
-# Клавиатура для калькулятора
-kb_calc = InlineKeyboardMarkup(
-    inline_keyboard=[
-         [
-             InlineKeyboardButton(text='Рассчитать норму калорий', callback_data='calories'),
-             InlineKeyboardButton(text='Формулы расчёта', callback_data='formulas')
-         ]
-    ]
-)
-
 
 # Кнопка "Отмена"
-kb_cancel = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(text='Отмена', callback_data='cancel_registration')
-        ]
-    ],
-    resize_keyboard=True
-)
+def get_kb_cancel(str_cancel):
+    kb_cancel = InlineKeyboardMarkup(input_field_placeholder=str_cancel, resize_keyboard=True, one_time_keyboard=True)
+    buttons = InlineKeyboardButton(text='Отмена', callback_data='cancel_registration')
+    kb_cancel.add(buttons)
+    return kb_cancel
 
 
 # Клавиатура для каталога
 def get_kb_products(products):
-    kb_products = InlineKeyboardMarkup()
-    buttons = [InlineKeyboardButton(text=product[1], callback_data=f'product_buying_{product[0]}') for product in products]
+    kb_products = InlineKeyboardMarkup(input_field_placeholder="Сделайте выбор", resize_keyboard=True)
+    buttons = [InlineKeyboardButton(text=product[1], callback_data=f'product_{product[0]}') for product in products]
     kb_products.add(*buttons)
     return kb_products
