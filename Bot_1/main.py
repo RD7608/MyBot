@@ -6,8 +6,10 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
 import database
-import handlers
 import config
+import User
+import Admin
+import Manage
 
 # Настраиваем логгер
 logging.basicConfig(level=logging.INFO,
@@ -15,6 +17,7 @@ logging.basicConfig(level=logging.INFO,
                     filename='bot.log',
                     filemode='a',
                     encoding='utf-8')
+logger = logging.getLogger(__name__)
 
 api = config.API
 
@@ -24,44 +27,41 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 # Инициализируем базу данных
 database.initiate_db()
 
-
 # Регистрация handler'ов
-dp.message_handler(commands=['start'])(handlers.start)
-dp.message_handler(text='📌 О нас')(handlers.show_info)
-dp.message_handler(text='👤 Профиль', state=None)(handlers.sing_up)
-dp.message_handler(state=handlers.RegistrationState.username)(handlers.set_username)
-dp.message_handler(state=handlers.RegistrationState.email)(handlers.set_email)
-dp.message_handler(state=handlers.RegistrationState.age)(handlers.set_age)
-dp.callback_query_handler(text='cancel_registration', state='*')(handlers.cancel_registration)
+dp.message_handler(commands=['start'])(User.start )
+dp.message_handler(commands=['info'])(User.info )
+dp.message_handler(text='📌 О нас')(User.info )
+dp.message_handler(text='👤 Профиль', state=None)(User.profile )
 
-dp.message_handler(text='🛒 Заказать')(handlers.get_buying_list)
-dp.callback_query_handler(text_startswith='product_buying_')(handlers.send_confirm_message)
 
-dp.message_handler(text='📝 Мои заказы')(handlers.main_menu)
-dp.callback_query_handler(text='calories')(handlers.get_calories)
-dp.message_handler(state=handlers.UserState.age)(handlers.set_user_age)
-dp.message_handler(state=handlers.UserState.growth)(handlers.set_user_growth)
-dp.message_handler(state=handlers.UserState.weight)(handlers.set_user_weight)
+dp.message_handler( state=User.RegistrationState.username )(User.set_username )
+dp.message_handler( state=User.RegistrationState.email )(User.set_email )
+dp.message_handler( state=User.RegistrationState.age)(User.set_age )
+dp.callback_query_handler(text='cancel_registration', state='*')(User.cancel_registration)
 
-dp.callback_query_handler(text='formulas')(handlers.get_formulas)
+dp.message_handler(text='🛒 Заказать')(User.get_buying_list)
+dp.callback_query_handler(text_startswith='product_buying_')(User.send_confirm_message)
 
-dp.message_handler(content_types=types.ContentTypes.ANY)(handlers.unknown_message)
-dp.errors_handler(exception=Exception)(handlers.global_error_handler)
+dp.message_handler(text='📝 Мои заказы')(User.main_menu)
+dp.callback_query_handler(text='calories')(User.get_calories)
+dp.message_handler( state=User.UserState.age)(User.set_user_age)
+dp.message_handler( state=User.UserState.growth)(User.set_user_growth)
+dp.message_handler( state=User.UserState.weight)(User.set_user_weight)
+
+dp.callback_query_handler(text='formulas')(User.get_formulas)
+
+dp.message_handler(content_types=types.ContentTypes.ANY)(User.unknown_message)
+dp.errors_handler(exception=Exception)(User.global_error_handler )
 
 
 async def set_commands():
     commands = [
         BotCommand(command='start', description='Главное меню'),
         BotCommand(command='info', description='Информация'),
-        BotCommand(command='buy', description='Купить'),
-        BotCommand(command='reg', description='Регистрация'),
     ]
     await bot.set_my_commands(commands, scope=BotCommandScopeDefault())
 
 
 if __name__ == '__main__':
-    logging.info('Бот запущен')
-    loop = asyncio.get_event_loop()
-    loop.create_task(set_commands())
-
-    executor.start_polling(dp, skip_updates=True, loop=loop)
+    logger.info('Бот запущен')
+    executor.start_polling(dp, skip_updates=True)
