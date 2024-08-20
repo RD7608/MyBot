@@ -1,31 +1,33 @@
 import logging
 import asyncio
 
-from aiogram import Bot , Dispatcher , executor , types
+from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.types import BotCommand , BotCommandScopeDefault
+from aiogram.types import BotCommand, BotCommandScopeDefault
 
 import database
-import config
 import User
 import Admin
 import Manage
 
+from config import *
+
+
 # Настраиваем логгер
-logging.basicConfig ( level=logging.INFO ,
-                      format='%(asctime)s - %(levelname)s - %(message)s' ,
-                      filename='bot.log' ,
-                      filemode='a' ,
-                      encoding='utf-8' )
-logger = logging.getLogger ( __name__ )
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    filename='bot.log',
+                    filemode='a',
+                    encoding='utf-8')
+logger = logging.getLogger(__name__)
 
-api = config.API
+api = API
 
-bot = Bot ( token=api , parse_mode='HTML' )
+bot = Bot(token=api, parse_mode='HTML')
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 # Инициализируем базу данных
-database.initiate_db ()
+database.initiate_db()
 
 # Регистрация handler'ов
 dp.message_handler(commands=['start'])(User.start)
@@ -42,23 +44,19 @@ dp.message_handler(text='🛒 Заказать')(User.new_order_request)
 dp.callback_query_handler(text_startswith='product_')(User.send_confirm_message)
 
 dp.message_handler(text='📝 Мои заказы')(User.my_orders)
-dp.callback_query_handler ( text='calories' ) ( User.get_calories )
-dp.message_handler ( state=User.UserState.age ) ( User.set_user_age )
-dp.message_handler ( state=User.UserState.growth ) ( User.set_user_growth )
-dp.message_handler ( state=User.UserState.weight ) ( User.set_user_weight )
 
-dp.callback_query_handler ( text='formulas' ) ( User.get_formulas )
+dp.message_handler(text='🔙 Назад')(User.back_to_main_menu)
 
-dp.message_handler( content_types=types.ContentTypes.ANY)(User.unknown_message)
+dp.message_handler(content_types=types.ContentTypes.ANY)(User.unknown_message)
 dp.errors_handler(exception=Exception)(User.global_error_handler)
 
 
 async def set_commands():
     commands = [
-        BotCommand ( command='start' , description='Главное меню' ) ,
-        BotCommand ( command='info' , description='Информация' ) ,
+        BotCommand(command='start', description='Главное меню'),
+        BotCommand(command='info', description='Информация'),
     ]
-    await bot.set_my_commands ( commands , scope=BotCommandScopeDefault () )
+    await bot.set_my_commands(commands, scope=BotCommandScopeDefault())
 
 
 async def on_startup(_):
