@@ -14,13 +14,37 @@ from utils import *
 class RegistrationState(StatesGroup):
     username = State()
     email = State()
-    age = State()
+    phone = State()
+    sity = State()
+    address = State()
 
 
-class UserState(StatesGroup):
-    age = State()
-    growth = State()
-    weight = State()
+class User:
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.username = None
+        self.email = None
+        self.phone = None
+        self.sity = None
+        self.address = None
+
+    def from_db(self):
+        row = get_user_by_id(self.user_id)
+        if row is not None:
+            self.user_id = row[1]
+            self.email = row[2]
+            self.phone = row[3]
+            self.sity = row[4]
+            self.address = row[5]
+        else:
+            print(f"Пользователь  {self.user_id} {self.username} не найден в базе данных.")
+
+    def to_db(self):
+        add_user(self)
+
+    def __repr__(self):
+        return (f"User_id({self.user_id}, Username({self.username},"
+                f" {self.email}, {self.phone}, {self.sity}, {self.address})")
 
 
 async def start(message: types.Message):
@@ -60,7 +84,7 @@ async def send_confirm_message(call: types.CallbackQuery):
 
 
 async def profile(message: types.Message):
-    await message.answer("просмтреть профиль")
+    await message.answer("просмотреть профиль")
 
 
 async def sign_up(message: types.Message):
@@ -113,9 +137,11 @@ async def set_age(message: types.Message, state: FSMContext):
 
     async with state.proxy() as data:
         data['age'] = age
-    add_user(data['username'], data['email'], data['age'])
-    await message.answer("Регистрация успешно завершена!")
-    await state.finish()
+
+#        User.to_db()
+
+        await message.answer("Регистрация успешно завершена!")
+        await state.finish()
 
 
 async def global_error_handler(update: types.Update, exception: Exception):

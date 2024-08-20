@@ -32,15 +32,23 @@ def get_product_by_id(product_id):
     return product_info
 
 
-def add_user(username, email, age):
-    # Добавляем нового пользователя с балансом 1000
-    c.execute("INSERT INTO Users (username, email, age, balance) VALUES (?, ?, ?, 1000)", (username, email, age))
+def add_user(user):
+    # Добавляем нового пользователя
+    c.execute("INSERT INTO Users (user_id, username, email, phone, sity, address) VALUES (?, ?, ?, ?, ?, ?)",
+    (user.user_id, user.username, user.email, user.phone, user.sity, user.address))
     conn.commit()
 
 
-def is_included(username):
+def get_user_by_id(user_id):
+    c.execute("SELECT * FROM Users WHERE user_id = ?", (user_id,))
+    user = c.fetchone()
+    conn.commit()
+    return user
+
+
+def is_included(user_id):
     # Проверяем, есть ли пользователь с таким именем в таблице
-    c.execute("SELECT COUNT(*) FROM Users WHERE username = ?", (username,))
+    c.execute("SELECT COUNT(*) FROM Users WHERE user_id = ?", (user_id,))
     count = c.fetchone()[0]
     conn.commit()
     return count > 0
