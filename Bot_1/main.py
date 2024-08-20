@@ -26,18 +26,18 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 database.initiate_db()
 
 # Регистрация handler'ов
-dp.message_handler(commands=['start'])( User.start )
-dp.message_handler(commands=['info'])( User.info )
-dp.message_handler(text='📌 О нас')( User.info )
+dp.message_handler(commands=['start'])(User.start)
+dp.message_handler(commands=['info'])(User.info)
+dp.message_handler(text='📌 О нас')(User.info)
 dp.message_handler(text='👤 Профиль', state=None)(User.profile)
 
 dp.message_handler(state=User.RegistrationState.username)(User.set_username)
 dp.message_handler(state=User.RegistrationState.email)(User.set_email)
 dp.message_handler(state=User.RegistrationState.sity)(User.set_age)
-dp.callback_query_handler(text='cancel_registration', state='*')( User.cancel_registration )
+dp.callback_query_handler(text='cancel_registration', state='*')(User.cancel_registration)
 
-dp.message_handler(text='🛒 Заказать')( User.new_order_request )
-dp.callback_query_handler(text_startswith='product_')( User.send_confirm_message )
+dp.message_handler(text='🛒 Заказать')( User.new_order_request)
+dp.callback_query_handler(text_startswith='product_')(User.send_confirm_message)
 
 # dp.message_handler(text='📝 Мои заказы')( User.my_orders )
 
