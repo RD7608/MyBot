@@ -5,9 +5,10 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
 import database
+from handlers import Start
 from handlers import User
-
-from config import *
+from handlers import Admin
+import config
 
 
 # Настраиваем логгер
@@ -17,13 +18,16 @@ logging.basicConfig(level=logging.INFO,
                     encoding='utf-8')
 logger = logging.getLogger(__name__)
 
-api = API
+api = config.API
 
 bot = Bot(token=api, parse_mode='HTML')
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 # Инициализируем базу данных
 database.initiate_db()
+
+#dp.message_handler(lambda m: database.check_block(m.from_user.id))(Start.ban_message)
+#dp.callback_query_handler(lambda c: database.check_block(c.from_user.id))(Start.ban_callbackquery)
 
 # Регистрация handler'ов
 dp.message_handler(commands=['start'])(User.start)
@@ -36,15 +40,17 @@ dp.message_handler(state=User.RegistrationState.email)(User.set_email)
 dp.message_handler(state=User.RegistrationState.sity)(User.set_age)
 dp.callback_query_handler(text='cancel_registration', state='*')(User.cancel_registration)
 
-dp.message_handler(text='🛒 Заказать')( User.new_order_request)
+dp.message_handler(text='🛒 Заказать')(User.new_order_request)
+dp.callback_query_handler(text_startswith='city_')(User.city_selected)
 dp.callback_query_handler(text_startswith='product_')(User.send_confirm_message)
 
-# dp.message_handler(text='📝 Мои заказы')( User.my_orders )
+dp.message_handler(text='📝 Мои заказы')(User.view_orders)
+dp.callback_query_handler(text_startswith='orders_')(User.orders_callback)
 
 # dp.message_handler(text='🔙 Назад')( User.back_to_main_menu )
 
-dp.message_handler(content_types=types.ContentTypes.ANY)( User.unknown_message )
-dp.errors_handler(exception=Exception)( User.global_error_handler )
+dp.message_handler(content_types=types.ContentTypes.ANY)(User.unknown_message)
+dp.errors_handler(exception=Exception)(User.global_error_handler)
 
 
 async def set_commands():

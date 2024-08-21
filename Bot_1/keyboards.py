@@ -16,9 +16,9 @@ kb_start = ReplyKeyboardMarkup(
 
 
 # Кнопка "Отмена"
-def get_kb_cancel(str_cancel):
+def get_kb_cancel(str_cancel='Отмена'):
     kb_cancel = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    buttons = InlineKeyboardButton(text='Отмена', callback_data='cancel_registration')
+    buttons = InlineKeyboardButton(text=str_cancel, callback_data='cancel_registration')
     kb_cancel.add(buttons)
     return kb_cancel
 
