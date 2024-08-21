@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 import logging
 
 
@@ -143,9 +144,7 @@ def insert_order_item(order_id, product_id, quantity, price):
 
 def get_orders(user_id):
     c.execute("SELECT * FROM Orders WHERE user_id = ?", (user_id,))
-    orders = c.fetchall()
-    conn.commit()
-    return orders
+    return c.fetchall()
 
 
 def get_orders_by_status(user_id, status):
@@ -156,9 +155,9 @@ def get_orders_by_status(user_id, status):
         4: "completed"
     }
     c.execute("SELECT * FROM Orders WHERE user_id = ? AND status = ?", (user_id, status_map[status]))
-    orders = c.fetchall()
-    conn.commit()
-    return orders
+#    orders = c.fetchall()
+#    conn.commit()
+    return c.fetchall()
 
 
 def check_block(id):
@@ -168,10 +167,18 @@ def check_block(id):
 
 
 def set_block(id):
-    c.execute(f"INSERT INTO block VALUES({id}); ").fetchall()
     conn.commit()
 
 
 def del_block(id):
-    c.execute(f"DELETE FROM block WHERE id = {id}; ").fetchall()
     conn.commit()
+
+def get_orders_status_3():
+    c.execute ( "SELECT id, user_id FROM orders WHERE status = 3 AND delivery_date = ?" ,
+                     (datetime.now().strftime("%Y-%m-%d"),))
+    return c.fetchall()
+
+
+def get_order_items(order_id):
+    c.execute("SELECT product_id, quantity FROM order_items WHERE order_id = ?", (order_id,))
+    return c.fetchall()
