@@ -28,9 +28,9 @@ async def send_message(reminder):
     user_id = reminder[1]
     event_type = reminder[2]
     event_name = reminder[3]
-    event_message = reminder[4]
-    event_date = reminder[5]
-    event_time = reminder[6]
+    event_date = reminder[4]
+    event_time = reminder[5]
+    event_message = reminder[6]
     message = f"⏰ {event_type} {event_name}\n : {event_message}"
     await bot.send_message(chat_id=user_id, text=message)
     logger.info(f"Отправлено {reminder}")
