@@ -41,6 +41,14 @@ def is_admin(user_id):
     return user_id in ADMINS
 
 
+async def is_banned(user_id):
+    user = await get_user(user_id)
+    if user[4] == 1:
+        return True
+    else:
+        return False
+
+
 def is_valid_email(email):
     """
     Проверяет, является ли переданная строка корректным email-адресом.

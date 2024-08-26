@@ -26,7 +26,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 dp.message_handler(commands=['start'])(handlers.start.start)
 dp.message_handler(commands=['remind'])(handlers.reminders.show_reminders)
 dp.message_handler(commands=['del'])(handlers.reminders.del_message)
-#dp.message_handler(commands=['info'])(handlers.start.info)
+dp.message_handler(commands=['info'])(handlers.start.info)
 
 #dp.message_handler(text='Регистрация', state=None)(handlers.start.register_user)
 dp.message_handler(state=handlers.start.RegistrationState.name)(handlers.start.process_name)

@@ -6,7 +6,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from database import add_reminder, get_reminders, del_reminder, del_all_reminders
-from utils import valid_time, validate_date
+from utils import valid_time, validate_date, is_banned
 from keyboards.inline import inline_keyboard_calendar, kb_show_reminders, kb_type_reminder
 
 logger = logging.getLogger(__name__)
@@ -27,6 +27,10 @@ class EnterNumberState(StatesGroup):
 
 async def process_add_task(message: types.Message):
     logger.info(message.text)
+    if await is_banned(message.from_user.id):
+        await message.answer("Вы заблокированы. Напишите администратору для разблокировки.", reply_markup=None)
+        logger.info(f"User {message.from_user.id} is banned.")
+        return
     await message.answer("Выберите тип напоминания:", reply_markup=kb_type_reminder())
     await ReminderState.event_type.set()
 
@@ -162,6 +166,9 @@ async def confirm_reminder(call: types.CallbackQuery, state: FSMContext):
 
 async def show_reminders(message: types.Message):
     user_id = message.from_user.id
+    if await is_banned(user_id):
+        await message.answer("Вы заблокированы. Напишите администратору для разблокировки.", reply_markup=None)
+        return
     reminders = await get_reminders(user_id)
     if reminders:
         for reminder in reminders:

@@ -17,7 +17,7 @@ async def start(message: types.Message):
 
     if user:
         if user[4]:  # if user is banned
-            await message.answer("Вы заблокированы. Напишите администратору для разблокировки.")
+            await message.answer("Вы заблокированы. Напишите администратору для разблокировки.", reply_markup=None)
         else:
             await message.answer(f"Добро пожаловать, {user[1]}!")
             await message.answer("Выберите действие:", reply_markup=main_menu(is_admin(user_id)))
@@ -76,3 +76,8 @@ async def global_error_handler(update: types.Update, exception: Exception):
 async def unknown_message(message: types.Message):
     logger.info(f'Получено неизвестное сообщение от {message.from_user.username}: {message.text}')
     await message.answer('Извините, я не понимаю это сообщение. Пожалуйста, попробуйте что-нибудь другое.')
+
+
+async def info(message: types.Message):
+    await message.answer(f"<b>Это бот для работы с напоминаниями</b>.\nДля создания и получения напоминаний необходимо пройти регистрацию.")
+
