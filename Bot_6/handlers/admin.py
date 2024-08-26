@@ -33,15 +33,14 @@ async def stats_callback(callback: types.CallbackQuery):
     users = await get_user()
     reminders = await get_reminders()
     total_users = len(users)
-    blocked_users = sum(1 for user in users if user[3] == 1)
+    blocked_users = sum(1 for user in users if user[4] == 1)
     total_reminders = len(reminders)
-    sent_reminders = sum(1 for reminder in reminders if reminder[2] == 1)
+    sent_reminders = sum(1 for reminder in reminders if reminder[7] == 1)
     stats = f"Всего пользователей: {total_users}\nЗаблокированных пользователей: {blocked_users}\nВсего напоминаний: {total_reminders}\nОтправленных напоминаний: {sent_reminders}"
     await callback.message.answer(stats)
 
 
 async def user_callback(call: types.CallbackQuery):
-    print(call.data)
     if call.data.startswith("block"):
         # Здесь должна быть логика блокировки пользователя
         await call.message.answer("Пожалуйста, введите ID пользователя, которого хотите заблокировать.")

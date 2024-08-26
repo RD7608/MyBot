@@ -86,7 +86,6 @@ async def validate_user_id(user_id: str) -> bool:
         if user_id <= 0:
             raise ValueError
         user = await get_user(user_id)
-        print(user)
         if not user:
             raise ValueError
         return True

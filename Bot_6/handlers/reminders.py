@@ -27,9 +27,9 @@ class EnterNumberState(StatesGroup):
 
 async def process_add_task(message: types.Message):
     logger.info(message.text)
-    if await is_banned(message.from_user.id):
+    if await is_banned(message.chat.id):
         await message.answer("Вы заблокированы. Напишите администратору для разблокировки.", reply_markup=None)
-        logger.info(f"User {message.from_user.id} is banned.")
+        logger.info(f"User {message.chat.id} is banned.")
         return
     await message.answer("Выберите тип напоминания:", reply_markup=kb_type_reminder())
     await ReminderState.event_type.set()
@@ -62,7 +62,6 @@ async def set_event_name(message: types.Message, state: FSMContext):
 
 
 async def set_event_date(call: types.CallbackQuery, state: FSMContext):
-    print("дата", call.data)
     async with state.proxy() as data:
         if call.data == 'date_manual':
             await call.message.answer("Введите дату события (в формате ДД-ММ-ГГГГ):")
@@ -80,14 +79,12 @@ async def set_event_date(call: types.CallbackQuery, state: FSMContext):
                 await call.message.answer(result)
                 return
             data['event_date'] = result
-    print(data['event_date'])
     await call.message.delete()
     await call.message.answer("Введите время события (в формате ЧЧ:ММ или ЧЧ-ММ):")
     await ReminderState.next()
 
 
 async def set_event_time(message: types.Message, state: FSMContext):
-    print("time", message.text)
     async with state.proxy() as data:
         event_time = valid_time(message.text)
         if event_time:
@@ -97,7 +94,6 @@ async def set_event_time(message: types.Message, state: FSMContext):
                 "Неправильный формат/недопустимое время. Пожалуйста, введите время в формате ЧЧ:ММ или ЧЧ-ММ и от 00:00 до 23:59")
             return
 
-    print(data['event_time'])
     keyboard = types.InlineKeyboardMarkup()
     skip_button = types.InlineKeyboardButton('или пропустить', callback_data='skip_text')
     keyboard.add(skip_button)
