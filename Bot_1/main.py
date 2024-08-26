@@ -4,10 +4,12 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
+
 import database
 from handlers import Start
 from handlers import User
 from handlers import Admin
+import utils
 import config
 
 
@@ -53,6 +55,7 @@ dp.message_handler(content_types=types.ContentTypes.ANY)(User.unknown_message)
 dp.errors_handler(exception=Exception)(User.global_error_handler)
 
 
+
 async def set_commands():
     commands = [
         BotCommand(command='start', description='Главное меню'),
@@ -68,6 +71,17 @@ async def on_startup(_):
 
 async def on_shutdown(_):
     logger.info('Бот выключен')
+
+
+# Планирование задачи
+import schedule
+import time
+schedule.every().day.at("08:00").do(utils.send_notifications)  # вызов функции в 8:00 каждый день
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+
 
 
 if __name__ == '__main__':
