@@ -77,6 +77,7 @@ async def set_event_date(call: types.CallbackQuery, state: FSMContext):
                 return
             data['event_date'] = result
     print(data['event_date'])
+    await call.message.delete()
     await call.message.answer("Введите время события (в формате ЧЧ:ММ или ЧЧ-ММ):")
     await ReminderState.next()
 
@@ -106,9 +107,10 @@ async def enter_text_reminder(call: types.CallbackQuery, state: FSMContext):
     if call.data == 'skip_text':
         async with state.proxy() as data:
             data['event_message'] = ''
-        await save_reminder(state, user_id)
-        await call.message.answer("✔ Напоминание добавлено!")
-        await state.finish()
+        await call.message.delete()
+        await save_reminder(call.message, state)
+#        await call.message.answer("✔ Напоминание добавлено!")
+#        await state.finish()
 
 
 async def set_event_message(message: types.Message, state: FSMContext):
@@ -117,27 +119,45 @@ async def set_event_message(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['event_message'] = message.text
 
-    await save_reminder(state, user_id)
-    await message.answer("✔ Напоминание добавлено!")
-    await state.finish()
+    await save_reminder(message, state)
+#    await message.answer("✔ Напоминание добавлено!")
+#    await state.finish()
 
 
-#    await show_main_menu(message)
-async def save_reminder(state: FSMContext, user_id):
+async def save_reminder(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        event_type = data['event_type']
-        event_name = data['event_name']
-        event_date = data['event_date']
-        event_time = data['event_time']
-        event_message = data['event_message']
+        await message.answer(
+            f"Напоминание:\n"
+            f"{data['event_type']} - {data['event_name']}\n"
+            f"запланировано на {data['event_date']} в {data['event_time']}\n"
+            f"Текст: {data['event_message']}\n\n"
+            "<b>Подтвердить создание напоминания?</b>",
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton("✔️ Да", callback_data="confirm")],
+                    [InlineKeyboardButton("❌ Нет", callback_data="cancel")]
+                ]
+            )
+        )
+        await ReminderState.next()
 
-    await add_reminder(user_id, event_type, event_name, event_message, event_date, event_time)
 
-    logger.info(str(data))
+async def confirm_reminder(call: types.CallbackQuery, state: FSMContext):
+    logger.info(call.data)
+    if call.data == "confirm":
+        user_id = call.from_user.id
+        async with state.proxy() as data:
+            await add_reminder(user_id, data)
+#        await add_reminder(user_id, event_type, event_name, event_date, event_time, event_message)
 
+        logger.info(str(data))
 
-async def show_main_menu(message: types.Message):
-    await message.answer("Главное меню:", reply_markup=main_menu(is_admin(message.from_user.id)))
+        await call.message.answer("✔Напоминание успешно создано!")
+
+    else:
+        await call.message.answer("❗Напоминание отменено.")
+    await call.message.delete()
+    await state.finish()
 
 
 async def show_reminders(message: types.Message):
@@ -148,9 +168,8 @@ async def show_reminders(message: types.Message):
             await message.answer(f"<b>Номер: {reminder[0]}</b>|"
                                  f" {reminder[2]} |"
                                  f" {reminder[3]} |"
-                                 f" {reminder[4]} |"
-                                 f"Дата: {reminder[5]} |"
-                                 f"в: {reminder[6]} \n")
+                                 f" {reminder[6]} |"
+                                 f"план: {reminder[4]} в {reminder[5]} \n")
 
         await message.answer('Выберите действие:', reply_markup=kb_show_reminders())
 
@@ -168,6 +187,8 @@ async def process_callback_query(call: types.CallbackQuery):
     elif call.data == 'delete_all_reminders':
         await del_all_reminders(user_id)
         await call.message.answer("Все напоминания удалены!", reply_markup=types.ReplyKeyboardRemove())
+
+    await call.message.delete()
 
 
 async def process_message(message: types.Message, state: FSMContext):

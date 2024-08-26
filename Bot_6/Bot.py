@@ -41,6 +41,7 @@ dp.callback_query_handler(lambda qd: qd.data.startswith('date_'),
 dp.message_handler(state=handlers.reminders.ReminderState.event_time)(handlers.reminders.set_event_time)
 dp.callback_query_handler(state=handlers.reminders.ReminderState.event_message)(handlers.reminders.enter_text_reminder)
 dp.message_handler(state=handlers.reminders.ReminderState.event_message)(handlers.reminders.set_event_message)
+dp.callback_query_handler(state=handlers.reminders.ReminderState.confirm)(handlers.reminders.confirm_reminder)
 
 dp.message_handler(text='Просмотреть список')(handlers.reminders.show_reminders)
 dp.callback_query_handler(text=['add_reminder', 'delete_reminder', 'delete_all_reminders'])(

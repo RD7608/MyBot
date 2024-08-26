@@ -25,9 +25,9 @@ async def init_db():
             user_id INTEGER,
             event_type TEXT,
             event_name TEXT,
-            event_message TEXT,
             event_date TEXT,
             event_time TEXT,
+            event_message TEXT,
             status INTEGER DEFAULT 0,
             FOREIGN KEY (user_id) REFERENCES users (user_id))''')
         await db.commit()
@@ -66,11 +66,16 @@ async def unban_user(user_id, reason, date):
         await db.commit()
 
 
-async def add_reminder(user_id, event_type, event_name, event_message, event_date, event_time):
+async def add_reminder(user_id, data):
+    event_type = data['event_type']
+    event_name = data['event_name']
+    event_date = data['event_date']
+    event_time = data['event_time']
+    event_message = data['event_message']
     try:
         async with aiosqlite.connect('database.db') as db:
-            await db.execute('INSERT INTO reminders (user_id, event_type, event_name, event_message, event_date, event_time) VALUES (?, ?, ?, ?, ?, ?)',
-                             (user_id, event_type, event_name, event_message, event_date, event_time))
+            await db.execute('INSERT INTO reminders (user_id, event_type, event_name, event_date, event_time, event_message) VALUES (?, ?, ?, ?, ?, ?)',
+                             (user_id, event_type, event_name, event_date, event_time, event_message))
             await db.commit()
     except aiosqlite.Error as e:
         logging.error(f"Ошибка при создании напоминания для пользователя {user_id}: {e}")
@@ -90,7 +95,7 @@ async def get_reminders(user_id=None):
 
 async def del_reminder(user_id, reminder_id):
     async with aiosqlite.connect('database.db') as db:
-        cursor = await db.execute('DELETE FROM reminders WHERE user_id = ? AND id = ?', (user_id, reminder_id))
+        cursor = await db.execute('DELETE FROM reminders WHERE user_id = ? AND id = ?  AND status = 0', (user_id, reminder_id))
         await db.commit()
         rows_affected = cursor.rowcount
         return rows_affected > 0
