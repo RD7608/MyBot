@@ -55,6 +55,10 @@ async def user_callback(call: types.CallbackQuery):
 
 async def get_user_id(message: types.Message, state: FSMContext):
     user_id = message.text
+    if user_id == 'cancel' or user_id == 'отмена':
+        await message.answer("Отменено")
+        await state.finish()
+        return
     if not await validate_user_id(user_id):
         await message.answer("Некорректный user_id или пользователь не существует.")
         return

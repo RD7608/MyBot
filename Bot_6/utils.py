@@ -32,12 +32,16 @@ async def send_message(reminder):
     event_time = reminder[5]
     event_message = reminder[6]
     message = f"⏰ {event_type} {event_name}\n : {event_message}"
-    await bot.send_message(chat_id=user_id, text=message)
-    logger.info(f"Отправлено {reminder}")
-    return True
+    try:
+        await bot.send_message(chat_id=user_id, text=message)
+        logger.info(f"Отправлено {reminder}")
+        return True
+    except Exception as e:
+        logger.error(f"Ошибка при отправке напоминания: {e}")
+        return False
 
 
-def is_admin(user_id):
+def is_admin(user_id) -> bool:
     return user_id in ADMINS
 
 
