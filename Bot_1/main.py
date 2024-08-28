@@ -10,19 +10,11 @@ from handlers import Start
 from handlers import User
 from handlers import Admin
 import utils
-import config
+from config import bot
 
 
-# Настраиваем логгер
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    filemode='a',
-                    encoding='utf-8')
 logger = logging.getLogger(__name__)
 
-api = config.API
-
-bot = Bot(token=api, parse_mode='HTML')
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 # Инициализируем базу данных
